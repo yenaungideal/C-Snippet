@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+
+  <CodeSnippet Format="1.0.0">
+
+    <Header>
+
+      <Title>Select statement by parameter</Title>
+
+      <Shortcut>myselectByParam</Shortcut>
+
+      <Description>Code snippet select statement by parameter.</Description>
+
+      <Author>yn</Author>
+
+      <SnippetTypes>
+
+        <SnippetType>Expansion</SnippetType>
+
+      </SnippetTypes>
+
+    </Header>
+
+    <Snippet>
+
+      <Declarations>
+
+        <Literal>
+
+          <ID>returnType</ID>
+
+          <ToolTip>Return type</ToolTip>
+
+          <Default>DataSet</Default>
+
+        </Literal>
+
+        <Literal>
+
+          <ID>param</ID>
+
+          <ToolTip>Parameter</ToolTip>
+
+          <Default>value</Default>
+
+        </Literal>
+
+      </Declarations>
+
+      <Code Language="csharp">
+
+        <![CDATA[ 
+
+       /// <summary> 
+       /// Select statement by parameter.
+       /// </summary> 
+        
+         public static $returnType$ SelectByParameter(int $param$)
+        {
+            try
+            {
+                DbCommand cmd = db.GetStoredProcCommand("ST_SelectByParameter");
+                db.AddInParameter(cmd, "ID", DbType.$returnType$, $param$);
+                DataSet ds = db.ExecuteDataSet(cmd);
+                return ds;
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
+        }
+        $end$]]>
+
+      </Code>
+
+    </Snippet>
+
+  </CodeSnippet>
+
+</CodeSnippets>

@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+
+  <CodeSnippet Format="1.0.0">
+
+    <Header>
+
+      <Title>Delete statement by parameter</Title>
+
+      <Shortcut>mydeleteByParam</Shortcut>
+
+      <Description>Code snippet delete statement by parameter.</Description>
+
+      <Author>yn</Author>
+
+      <SnippetTypes>
+
+        <SnippetType>Expansion</SnippetType>
+
+      </SnippetTypes>
+
+    </Header>
+
+    <Snippet>
+
+      <Declarations>
+
+        <Literal>
+
+          <ID>returnType</ID>
+
+          <ToolTip>Return type</ToolTip>
+
+          <Default>Int32</Default>
+
+        </Literal>
+
+        <Literal>
+
+          <ID>param</ID>
+
+          <ToolTip>Parameter</ToolTip>
+
+          <Default>value</Default>
+
+        </Literal>
+
+        <Literal>
+
+          <ID>dBConvertType</ID>
+
+          <ToolTip>Converting Data Type For DB.</ToolTip>
+
+          <Default>ToInt32</Default>
+
+        </Literal> 
+      </Declarations>
+
+      <Code Language="csharp">
+
+        <![CDATA[ 
+
+       /// <summary> 
+       /// Delete statement by parameter.
+       /// </summary> 
+        
+         public static $returnType$ DeleteByParameter($returnType$ $param$)
+        {
+            try
+            {
+                string sql = "ST_DeleteWeldMapDrawings";
+                DbCommand cmd = db.GetStoredProcCommand(sql);
+                db.AddInParameter(cmd, "ID", DbType.$returnType$, $param$);
+                db.AddOutParameter(cmd, "ReturnVal", DbType.$returnType$, 0);
+                db.ExecuteNonQuery(cmd);
+                object x = db.GetParameterValue(cmd, "ReturnVal");
+                if (x != null)
+                    return Convert.$dBConvertType$(x);
+                else
+                    return -1;
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
+        }
+        $end$]]>
+
+      </Code>
+
+    </Snippet>
+
+  </CodeSnippet>
+
+</CodeSnippets>

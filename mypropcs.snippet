@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+
+  <CodeSnippet Format="1.0.0">
+    
+    <Header>
+
+      <Title>Property</Title>
+
+      <Shortcut>mypropcs</Shortcut>
+
+      <Description>Code snippet to define a property .</Description>
+
+      <Author>yn</Author>
+
+      <SnippetTypes>
+
+        <SnippetType>Expansion</SnippetType>
+
+      </SnippetTypes>
+
+    </Header>
+
+    <Snippet>
+
+        <Declarations>
+
+          <Literal>
+
+            <ID>type</ID>
+
+            <ToolTip>Property type</ToolTip>
+
+            <Default>int</Default>
+
+          </Literal>
+
+          <Literal>
+
+            <ID>property</ID>
+
+            <ToolTip>Property name</ToolTip>
+
+            <Default>Value</Default>
+
+          </Literal>
+
+          <Literal>
+
+            <ID>defaultValue</ID>
+
+            <ToolTip>The default value for this property.</ToolTip>
+
+            <Default>intValue</Default>
+
+          </Literal>
+
+        </Declarations>
+
+      <Code Language="csharp">
+
+        <![CDATA[ 
+
+       /// <summary> 
+       /// Property to set a $property$ 
+       /// </summary> 
+
+       private $type$ $defaultValue$; 
+
+       public $type$ $property$ 
+       
+       { 
+              get 
+              { 
+                  return $defaultValue$; 
+              }      
+
+              set 
+              { 
+                  $defaultValue$ = value; 
+              } 
+
+        } 
+
+        $end$]]>
+
+      </Code>
+
+    </Snippet>
+    
+  </CodeSnippet>
+
+</CodeSnippets>
