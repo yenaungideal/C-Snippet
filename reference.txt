@@ -1,0 +1,2 @@
+http://www.dirkstrauss.com/codesmith-generator/#.VnPG6VL2p6v
+http://stackoverflow.com/questions/19982053/how-do-i-add-an-existing-solution-to-github-from-visual-studio-2013   ---------uploating solution on git
