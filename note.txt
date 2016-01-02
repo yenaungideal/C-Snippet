@@ -1,0 +1,109 @@
+<add name="TestingConnectionString" connectionString="Data Source=KHINEPC;Initial Catalog=Testing;User ID=sa;Password=sasa"
+providerName="System.Data.SqlClient" />
+--------------------------------------------   
+public string id;
+public String ID
+{
+	get 
+	{	return id;	}
+	set
+	{	id = value;	}
+}
+
+public class StaffEntryEntityCollections:List<StaffEntryEntity>
+{
+}	
+---------------------------------------------
+using System.Data;
+using System.Data.Sql;
+using System.Data.SqlClient;
+using System.Configuration;
+
+SqlConnection conn;
+SqlCommand command;
+public StaffEntryDataController()
+{
+	conn = new SqlConnection(ConfigurationManager.ConnectionStrings["MainConnectionString"].ConnectionString);
+}
+
+public void State()
+{
+	if (conn.State == ConnectionState.Closed)
+	{
+		conn.Open();
+	}
+}
+
+public IDataReader Select()
+{
+	command = new SqlCommand("",conn);
+	command.CommandType=CommandType.StoredProcedure;
+	State();
+	return command.ExecuteReader(CommandBehavior.CloseConnection);
+}
+
+public void Insert(string Code, string Name)
+{
+	command = new SqlCommand("", conn);
+	command.CommandType = CommandType.StoredProcedure;
+	command.Parameters.Add("Code", DbType.String).Value = Code;
+	command.Parameters.Add("Name", DbType.String).Value = Name;
+	State();
+	command.ExecuteNonQuery();
+	conn.Close();
+}
+
+public DataTable Report()
+{
+	command = new SqlCommand("Supplier_Report", conn);
+	command.CommandType = CommandType.StoredProcedure;
+	SqlDataAdapter adapter = new SqlDataAdapter();
+	adapter.SelectCommand = command;
+	DataTable dt = new DataTable();
+	adapter.Fill(dt);
+	return dt;
+}
+
+public string a()
+{
+	command = new SqlCommand("", connection);
+	command.CommandType = CommandType.StoredProcedure;
+	connection.Open();
+	return Convert.ToString(command.ExecuteScalar());
+}
+
+public void b()
+{
+	command = new SqlCommand("", connection);
+	command.CommandType = CommandType.StoredProcedure;
+	connection.Open();
+	command.ExecuteNonQuery();
+	connection.Close();
+}
+--------------------------------------------------------
+public StaffEntryEntityCollections Select()
+{
+	StaffEntryEntityCollections entityCollections = new StaffEntryEntityCollections();
+	IDataReader reader = DataController.Select();
+	while (reader.Read())
+	{
+		StaffEntryEntity entity=new StaffEntryEntity ();
+		if (!(reader["StaffCode"] is DBNull))
+		{
+			entity.StaffCode = reader["StaffCode"].ToString();
+		}
+		if (!(reader["StaffName"] is DBNull))
+		{
+			entity.StaffCode = reader["StaffName"].ToString();
+		}
+		entityCollections.Add(entity);
+	}
+	reader.close();
+	return entityCollections;
+}
+
+StaffEntrys staffEntrys = ls.StaffEntrys.First(SalaryRates => SalaryRates.ID == s);
+./Entry.aspx?ID={0}&status=Delete
+
+ var data = ls.ExecuteQuery<StaffEntrys>("SELECT DISTINCT StaffEntry.StaffCode, StaffEntry.StaffName, StaffEntry.CreatedDate, StaffEntry.UpdatedDate, StaffEntry.SalaryRateID,  SalaryRate.Description  AS SalaryRates,SalaryRate.ID FROM StaffEntry inner join SalaryRate ON StaffEntry.SalaryRateID = SalaryRate.ID");
+           
