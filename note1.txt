@@ -1,0 +1,408 @@
+        SqlConnection Connection = new SqlConnection();
+        SqlCommand Command = new SqlCommand();
+        private void ConfigureSection()
+        {
+            string connection = ConfigurationManager.ConnectionStrings["SaleControlSystemConnectionString"].ConnectionString;
+            Connection = new SqlConnection(connection);
+        }
+        private void Report_DataBind()
+        {
+            Command = new SqlCommand("StockCode_Select", Connection);
+            Command.CommandType = CommandType.StoredProcedure;
+            Connection.Open();
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            adapter.SelectCommand = Command;
+            DataTable dt = new DataTable();
+            adapter.Fill(dt);
+            Connection.Close();
+            ReportDataSource rdsStockCode = new ReportDataSource();
+            rdsStockCode.Name = "StockCodeDataSet";
+            rdsStockCode.Value=dt;
+            rpvStockCode.LocalReport.DataSources.Add(rdsStockCode);
+            rpvStockCode.ZoomMode = ZoomMode.Percent;
+            rpvStockCode.DataBind();
+        }
+
+----------------Entity---------------
+        private string id;
+        public String ID
+        {
+            get 
+            {
+                return this.id;
+            }
+            set
+            {
+                this.id = value;
+            }
+        }
+-------------Entity Collection-------------
+   public class StockCodeEntityCollection : Collection<StockCodeEntity>
+    {
+    }
+-------------DataAccess-------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Entity;
+using System.Configuration;
+//using System.Data.Sql;
+using System.Data;
+using System.Data.SqlClient;
+
+namespace DataAccess
+{
+    public class StockCodeDataController
+    {
+        SqlConnection Connection = new SqlConnection();
+        SqlCommand Command = new SqlCommand();
+        public StockCodeDataController()
+        {
+            string connection = ConfigurationManager.ConnectionStrings["DBConnection"].ConnectionString;
+            Connection = new SqlConnection(connection);
+        }
+     
+
+        string sCode;
+        public string Insert(StockCodeEntity stockCodeEntity)
+        {
+            
+            Command = new SqlCommand("StockCode_Insert", Connection);
+            Command.CommandType = CommandType.StoredProcedure;
+            Command.Parameters.Add("@ID",SqlDbType.Char).Value = string.Empty;
+            Command.Parameters.Add("@Code", SqlDbType.VarChar).Value = stockCodeEntity.Code;
+            Command.Parameters.Add("@Description", SqlDbType.VarChar).Value = stockCodeEntity.Description;
+            Command.Parameters.Add("@Active", SqlDbType.Bit).Value = stockCodeEntity.Active;
+            Command.Parameters.Add("@CreatedUserID", SqlDbType.Char).Value = stockCodeEntity.CreatedUserID;
+            Connection.Open();
+            object stockCode =Command.ExecuteScalar();
+            if (stockCode != null)
+            {
+                 sCode = stockCode.ToString();
+            }
+            Connection.Close();
+            return sCode;
+        }
+
+        public IDataReader Select()
+        {
+            Command = new SqlCommand("StockCode_Select", Connection);
+            Command.CommandType = CommandType.StoredProcedure;
+            Connection.Open();
+            return Command.ExecuteReader(CommandBehavior.CloseConnection);
+        }
+
+        public DataTable SelectWithDataTable()
+        {
+            Command = new SqlCommand("StockCode_Select", Connection);
+            Command.CommandType = CommandType.StoredProcedure;
+            Connection.Open();
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            adapter.SelectCommand = Command;
+            DataTable dataTable = new DataTable();
+            adapter.Fill(dataTable);
+            Connection.Close();
+            return dataTable; 
+        }
+        public IDataReader SelectByID(string id)
+        {
+            Command = new SqlCommand("StockCode_SelectByID", Connection);
+            Command.CommandType = CommandType.StoredProcedure;
+            Command.Parameters.Add("@ID",SqlDbType.Char).Value = id;
+            Connection.Open();
+            return Command.ExecuteReader(CommandBehavior.CloseConnection);
+
+        }
+        public void Delete(string id)
+        {
+            Command = new SqlCommand("StockCode_Delete",Connection);
+            Command.CommandType = CommandType.StoredProcedure;
+            Command.Parameters.Add("@ID",SqlDbType.Char).Value=id;
+            Connection.Open();
+            Command.ExecuteNonQuery();
+            Connection.Close();
+        }
+
+        public void Update(StockCodeEntity stockCodeEntity)
+        {
+            Command = new SqlCommand("StockCode_Update", Connection);
+            Command.CommandType = CommandType.StoredProcedure;
+            Command.Parameters.Add("@ID", SqlDbType.Char).Value = stockCodeEntity.ID;
+            Command.Parameters.Add("@Code", SqlDbType.VarChar).Value = stockCodeEntity.Code;
+            Command.Parameters.Add("@Description", SqlDbType.VarChar).Value = stockCodeEntity.Description;
+            Connection.Open();
+            Command.ExecuteNonQuery();
+            Connection.Close();
+        }
+    }
+}
+--------------------------Business Logic------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DataAccess;
+using Entity;
+using System.Collections.ObjectModel;
+using System.Data;
+
+namespace BusinessLogic
+{
+    public class StockCodeController
+    {
+        StockCodeDataController stockCodeDataController;
+        public StockCodeController()
+        {
+            this.stockCodeDataController = new StockCodeDataController();
+        }
+
+        public string Insert(StockCodeEntity stockCodeEntity)
+        {
+            stockCodeEntity.Code = this.stockCodeDataController.Insert(stockCodeEntity);
+            return stockCodeEntity.Code;
+        }
+        private void FillStockCode(IDataReader dataReader, StockCodeEntity stockCodeEntity)
+        {
+            if (!(dataReader["ID"] is DBNull))
+            {
+                stockCodeEntity.ID = Convert.ToString(dataReader["ID"]);
+            }
+            if (!(dataReader["Code"] is DBNull))
+            {
+                stockCodeEntity.Code = Convert.ToString(dataReader["Code"]);
+            }
+            if (!(dataReader["Description"] is DBNull))
+            {
+                stockCodeEntity.Description = Convert.ToString(dataReader["Description"]);
+            }
+            if (!(dataReader["CreatedDate"] is DBNull))
+            {
+                stockCodeEntity.CreatedDate = Convert.ToDateTime(dataReader["CreatedDate"]);
+            }
+            if (!(dataReader["UpdatedDate"] is DBNull))
+            {
+                stockCodeEntity.UpdatedDate = Convert.ToDateTime(dataReader["UpdatedDate"]);
+            } 
+        }
+
+        public StockCodeEntityCollection Select()
+        {
+            StockCodeEntityCollection stockCodeEntityCollection = new StockCodeEntityCollection();
+            
+            IDataReader dataReader = stockCodeDataController.Select();
+            while (dataReader.Read())
+            {
+                StockCodeEntity stockCodeEntity = new StockCodeEntity();
+                // Fill User data from IDataReader to CompanyEntity.
+                this.FillStockCode(dataReader, stockCodeEntity);
+                stockCodeEntityCollection.Add(stockCodeEntity);
+            }
+           
+            return stockCodeEntityCollection;
+        }
+
+        public DataTable SelectWithDataTable()
+        {
+            return stockCodeDataController.SelectWithDataTable();
+        }
+
+        public StockCodeEntity SelectByID(string id)
+        {
+            StockCodeEntity stockCodeEntity = new StockCodeEntity();
+            IDataReader dataReader = stockCodeDataController.SelectByID(id);
+            while(dataReader.Read())
+            {
+                this.FillStockCode(dataReader, stockCodeEntity);
+            }
+            return stockCodeEntity;
+        }
+        public void Delete(string id)
+        {
+            this.stockCodeDataController.Delete(id);
+        }
+
+        public void Update(StockCodeEntity stockCodeEntity)
+        {
+            this.stockCodeDataController.Update(stockCodeEntity);
+        }
+    }
+}
+
+------------------State Management Technology--------------------
+<%@ Register assembly="AjaxControlToolkit" namespace="AjaxControlToolkit" tagprefix="asp" %>
+
+<add name="MainDB" connectionString="Data Source=YN-PC;Initial Catalog=IdealFrameWork;User ID=sa;Password=sasa; Connect Timeout=3600; pooling='true'; Max Pool Size=1000"
+      providerName="System.Data.SqlClient" />
+
+<asp:HyperLinkField DataNavigateUrlFields="CompanyInformationID" DataNavigateUrlFormatString="./Detail.aspx?ID={0}" Text="Edit">
+                            <ItemStyle Width="50px"  HorizontalAlign="Center"/>
+                        </asp:HyperLinkField>
+
+   private String UserID
+        {
+            get
+            {
+                object obj = ViewState["UserID"];
+                return obj == null ? string.Empty : obj.ToString();
+            }
+
+            set
+            {
+                ViewState["UserID"] = value;
+            }
+        }
+
+   public string RecordID
+        {
+            get
+            {
+                object obj = Request.QueryString["ID"];
+                return obj == null ? string.Empty : obj.ToString();
+            }
+        }
+
+
+ Session["VoucherNo"] = txtVoucherNo.Text;
+ String CompanyName
+        {
+            get
+            {
+                if (Session["CompanyName"] == null) 
+                    return String.Empty;
+                else
+                    return Session["CompanyName"].ToString();
+            }
+            set
+            {
+                Session["CompanyName"] = value;
+            }
+        }
+
+----------------------------------------------------
+ #region Properties
+        private string UserID
+        {
+            get {
+                object obj = ViewState["UserID"];
+                return obj == null ? string.Empty : obj.ToString();
+                }
+            set {
+                 ViewState["UserID"] = value;
+                }
+        }
+        #endregion
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                //GridViewDataBind();
+            }
+        }
+
+        protected void btnSave_Click(object sender, EventArgs e)
+        {
+            if (btnSave.Text == "Save")
+            {
+                DataContextDataContext db = new DataContextDataContext();
+                var modules = new Modules();
+                {
+                    modules.ID = Guid.NewGuid().ToString();
+                    modules.Code = txtCode.Text;
+                    modules.Description = txtDescription.Text;
+                    modules.PayRollDate = DateTime.ParseExact(txtPayRollDate.Text, "dd/MM/yyyy", null);
+                    modules.CreatedDate = DateTime.Now;
+                }
+                db.Modules.InsertOnSubmit(modules);
+                db.SubmitChanges();          
+            }
+            else
+            {
+                DataContextDataContext db = new DataContextDataContext();
+                Modules modules = db.Modules.First(Modules => Modules.ID == UserID);
+                modules.Code = txtCode.Text;
+                modules.Description = txtDescription.Text;
+                modules.PayRollDate = DateTime.ParseExact(txtPayRollDate.Text, "dd/MM/yyyy", null);
+                modules.UpdatedDate = DateTime.Now;
+                db.SubmitChanges();
+            }
+            this.Clear();
+            gvModule.DataBind();
+        }
+
+
+        private void Clear()
+        {
+            this.txtCode.Text = string.Empty;
+            this.txtDescription.Text = string.Empty;
+            this.txtPayRollDate.Text = string.Empty;
+        }
+
+     
+        protected void gvModule_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "DataEdit")
+            {
+                 UserID = e.CommandArgument.ToString();
+                 DataContextDataContext db = new DataContextDataContext();
+                 Modules modules = db.Modules.First(Modules=>Modules.ID==UserID);
+                 this.txtCode.Text = modules.Code;
+                 this.txtDescription.Text = modules.Description;
+                 this.txtPayRollDate.Text = modules.PayRollDate.ToString("dd/MM/yyyy");
+                 this.btnSave.Text = "UpDate";
+
+            }
+            else if (e.CommandName == "DataDelete")
+            { 
+                DataContextDataContext db = new DataContextDataContext();
+                Modules modules = db.Modules.First(Modules=>Modules.ID==e.CommandArgument.ToString());
+                db.Modules.DeleteOnSubmit(modules);
+                db.SubmitChanges();
+            }
+        }
+
+        protected void gvModule_Sorting(object sender, GridViewSortEventArgs e)
+        {
+
+        }
+
+        protected void linqDataSource_Selecting(object sender, LinqDataSourceSelectEventArgs e)
+        {
+            DataContextDataContext db = new DataContextDataContext();
+            var data = from modules in db.Modules
+                       select modules;
+            e.Result = data;
+        }
+
+        private void GridViewDataBind()
+        {
+            DataContextDataContext db = new DataContextDataContext();
+            var data = from modules in db.Modules
+                       select modules;
+            gvModule.DataSource = data;
+            gvModule.DataBind();
+        }
+
+        protected void btnCancle_Click(object sender, EventArgs e)
+        {
+            this.txtCode.Text = "";
+            this.txtDescription.Text = "";
+            this.txtPayRollDate.Text = "";
+        }
+
+   var c = from um in ls.UMs
+                    orderby um.UMDesp
+                    select new { um.UMID, um.UMDesp };
+            ddlUM.DataTextField = "UMDesp";
+            ddlUM.DataValueField = "UMID";
+            ddlUM.DataSource = c;
+            ddlUM.DataBind(); 
+--------------------------------------
+    var data = from sales in ls.SaleInvoiceItems
+                               join products in ls.Products on sales.ProductID equals products.ProductID
+                               where sales.SaleInvoiceID == ID
+                               select new{Key = 1,sales.SaleInvoiceItemID,sales.Quantity,sales.Price,products.ProductName,Amount=sales.Quantity * sales.Price};
